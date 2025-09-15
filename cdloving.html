@@ -62,7 +62,7 @@
         .heart {
             position: absolute;
             box-shadow: 0 0 40px #d5093c;
-            animation: beat .4s ease infinite normal;
+            animation: beat .4 ease infinite normal;
             background: linear-gradient(-90deg, #F50A45 0%, #d5093c 40%);
         }
 
@@ -185,10 +185,28 @@
         .music-switch:hover {
             background-color: #d5093c;
         }
+        
+        // 添加移动端自动播放提示样式
+        .auto-play-tip {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            z-index: 9999;
+            display: none;
+        }
     </style>
 <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style><input type="hidden" id="inject_idm_text_selection"><style></style></head>
 
 <body>
+    // 添加自动播放提示
+    <div class="auto-play-tip" id="auto-play-tip">
+        点击屏幕以启用音乐播放
+    </div>
 
     <div id="frame">
         <div class="heart left"></div>
@@ -209,7 +227,8 @@
         <button class="music-switch" id="switch-btn">切换到 qqbl.mp3</button>
     </div>
     
-    <audio id="audio-player" preload="auto">
+    // 修改音频标签，添加移动端兼容属性
+    <audio id="audio-player" preload="auto" muted playsinline webkit-playsinline>
         <source src="https://kingzhz.github.io/dqcx.mp3" type="audio/mpeg">
     </audio>
 
@@ -229,6 +248,7 @@
         const musicTitle = document.getElementById('music-title');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
+        const autoPlayTip = document.getElementById('auto-play-tip'); // 添加自动播放提示元素
         
         const musicSources = [
             'https://kingzhz.github.io/dqcx.mp3',
@@ -236,6 +256,41 @@
         ];
         
         let currentMusicIndex = 0;
+        
+        // 添加移动端自动播放处理
+        document.addEventListener('DOMContentLoaded', function() {
+            // 尝试自动播放
+            const playPromise = audioPlayer.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // 自动播放成功
+                    playBtn.textContent = '⏸';
+                    autoPlayTip.style.display = 'none';
+                }).catch(error => {
+                    // 自动播放失败，显示提示
+                    autoPlayTip.style.display = 'block';
+                });
+            }
+        });
+        
+        // 点击屏幕任意位置启用音频播放
+        document.body.addEventListener('touchstart', function() {
+            if (audioPlayer.paused) {
+                audioPlayer.play().then(() => {
+                    playBtn.textContent = '⏸';
+                    autoPlayTip.style.display = 'none';
+                }).catch(e => console.log('播放失败:', e));
+            }
+        }, { once: true });
+        
+        // 点击提示框也触发播放
+        autoPlayTip.addEventListener('click', function() {
+            audioPlayer.play().then(() => {
+                playBtn.textContent = '⏸';
+                autoPlayTip.style.display = 'none';
+            }).catch(e => console.log('播放失败:', e));
+        });
         
         // 播放/暂停按钮功能
         playBtn.addEventListener('click', () => {
