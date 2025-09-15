@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>loving</title>
+    <meta name="language" content="zh-CN">
+    <meta name="title" content="loving">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="https://cdn.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: pink;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #frame {
+            position: relative;
+            width: 80vw;
+            height: 60vw;
+            max-width: 400px;
+            max-height: 300px;
+            margin: 20px auto;
+        }
+
+        .left,
+        .right {
+            top: 0;
+            width: 40vw;
+            height: 40vw;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+        }
+
+        .left {
+            left: 7vw;
+        }
+
+        .right {
+            right: 7vw;
+            z-index: -1;
+        }
+
+        .bottom {
+            bottom: 7.2vw;
+            left: 20vw;
+            width: 40vw;
+            height: 40vw;
+            max-width: 200px;
+            max-height: 200px;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            box-shadow: 0 0 40px #d5093c;
+            animation: beat .4s ease infinite normal;
+            background: linear-gradient(-90deg, #F50A45 0%, #d5093c 40%);
+        }
+
+        @keyframes beat {
+            0% {
+                transform: scale(1) rotate(225deg);
+                box-shadow: 0 0 40px #d5093c;
+            }
+
+            50% {
+                transform: scale(1.1) rotate(225deg);
+                box-shadow: 0 0 70px #d5093c;
+            }
+
+            100% {
+                transform: scale(1) rotate(225deg);
+                box-shadow: 0 0 40px #d5093c;
+            }
+        }
+
+        .word {
+            position: relative;
+            width: 80%;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 8vw;
+            color: #c70012;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* 媒体查询：针对较大屏幕 */
+        @media (min-width: 768px) {
+            .word {
+                font-size: 40px;
+            }
+            
+            .left, .right {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .bottom {
+                width: 200px;
+                height: 200px;
+                bottom: 36px;
+                left: 100px;
+            }
+            
+            .left {
+                left: 35px;
+            }
+            
+            .right {
+                right: 35px;
+            }
+            
+            #frame {
+                width: 400px;
+                height: 300px;
+            }
+        }
+        
+        /* 音乐播放器样式 */
+        .music-player {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .music-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #c70012;
+            font-weight: bold;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .music-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .music-btn:hover {
+            background-color: #d5093c;
+        }
+        
+        .music-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .music-switch {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .music-switch:hover {
+            background-color: #d5093c;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="frame">
+        <div class="heart left"></div>
+        <div class="heart right"></div>
+        <div class="heart bottom"></div>
+    </div>
+
+    <b class="word">love</b>
+    
+    <!-- 自定义文字UI -->
+    <div class="custom-text-ui" style="margin-top: 20px; text-align: center;">
+        <input type="text" id="custom-text-input" placeholder="输入自定义文字"
+               style="padding: 8px; border: 1px solid #c70012; border-radius: 4px;">
+        <button id="update-text-btn"
+                style="padding: 8px 16px; background-color: #c70012; color: white;
+                       border: none; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+            更新文字
+        </button>
+    </div>
+
+    <!-- 音乐播放器UI -->
+    <div class="music-player">
+        <div class="music-title" id="music-title">当前播放: 断桥残雪</div>
+        <div class="music-controls">
+            <button class="music-btn" id="prev-btn" title="上一首">⏮</button>
+            <button class="music-btn" id="play-btn" title="播放/暂停">⏯</button>
+            <button class="music-btn" id="next-btn" title="下一首">⏭</button>
+        </div>
+        <button class="music-switch" id="switch-btn">切换到 全球变冷</button>
+    </div>
+    
+    <audio id="audio-player" preload="auto"></audio>
+
+    <script>
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const switchBtn = document.getElementById('switch-btn');
+        const musicTitle = document.getElementById('music-title');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // 定义音乐列表，包含歌曲名称和URL
+        const musicSources = [
+            {
+                name: '断桥残雪',
+                url: 'https://kingzhz.github.io/dqcx.mp3'
+            },
+            {
+                name: '全球变冷',
+                url: 'https://kingzhz.github.io/qqbl.mp3'
+            }
+        ];
+        
+        let currentMusicIndex = 0;
+        
+        // 初始化音频播放器
+        function initPlayer() {
+            audioPlayer.src = musicSources[currentMusicIndex].url;
+            musicTitle.textContent = `当前播放: ${musicSources[currentMusicIndex].name}`;
+            updateSwitchButton();
+        }
+        
+        // 更新切换按钮文字
+        function updateSwitchButton() {
+            const nextIndex = (currentMusicIndex + 1) % musicSources.length;
+            switchBtn.textContent = `切换到 ${musicSources[nextIndex].name}`;
+        }
+        
+        // 播放/暂停按钮功能
+        playBtn.addEventListener('click', togglePlay);
+        
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                audioPlayer.play()
+                    .then(() => {
+                        playBtn.textContent = '⏸';
+                    })
+                    .catch(error => {
+                        console.error('播放失败:', error);
+                        alert('音频播放失败，请检查网络连接或尝试刷新页面');
+                    });
+            } else {
+                audioPlayer.pause();
+                playBtn.textContent = '▶';
+            }
+        }
+        
+        // 切换音乐按钮功能
+        switchBtn.addEventListener('click', () => switchMusic(1));
+        
+        // 上一首/下一首按钮功能
+        prevBtn.addEventListener('click', () => switchMusic(-1));
+        nextBtn.addEventListener('click', () => switchMusic(1));
+        
+        function switchMusic(direction) {
+            currentMusicIndex = (currentMusicIndex + direction + musicSources.length) % musicSources.length;
+            audioPlayer.src = musicSources[currentMusicIndex].url;
+            audioPlayer.load();
+            audioPlayer.play()
+                .then(() => {
+                    musicTitle.textContent = `当前播放: ${musicSources[currentMusicIndex].name}`;
+                    updateSwitchButton();
+                    playBtn.textContent = '⏸';
+                })
+                .catch(error => {
+                    console.error('播放失败:', error);
+                    alert('音频播放失败，请检查网络连接或尝试刷新页面');
+                });
+        }
+        
+        // 更新播放按钮状态
+        audioPlayer.addEventListener('play', () => {
+            playBtn.textContent = '⏸';
+        });
+        
+        audioPlayer.addEventListener('pause', () => {
+            playBtn.textContent = '▶';
+        });
+        
+        // 音频播放结束时自动播放下一首
+        audioPlayer.addEventListener('ended', () => {
+            switchMusic(1);
+        });
+        
+        // 初始化播放器
+        initPlayer();
+        
+        // 自定义文字功能
+        const wordElement = document.querySelector('.word');
+        const updateBtn = document.getElementById('update-text-btn');
+        const textInput = document.getElementById('custom-text-input');
+        
+        updateBtn.addEventListener('click', () => {
+            if (textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+        
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+    </script>
+</body>
+</html>
