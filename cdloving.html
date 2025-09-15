@@ -209,9 +209,8 @@
         <button class="music-switch" id="switch-btn">切换到 qqbl.mp3</button>
     </div>
     
-    <audio id="audio-player" preload="auto">
-        <source src="https://kingzhz.github.io/dqcx.mp3" type="audio/mpeg">
-    </audio>
+    // 修改音频播放器为直接使用src属性而不是source标签
+    <audio id="audio-player" preload="auto" src="https://kingzhz.github.io/dqcx.mp3"></audio>
 
     <script>
         var b = document.body;
@@ -240,8 +239,14 @@
         // 播放/暂停按钮功能
         playBtn.addEventListener('click', () => {
             if (audioPlayer.paused) {
-                audioPlayer.play();
-                playBtn.textContent = '⏸';
+                audioPlayer.play()
+                    .then(() => {
+                        playBtn.textContent = '⏸';
+                    })
+                    .catch(error => {
+                        console.error('播放失败:', error);
+                        alert('音频播放失败，请检查网络连接或尝试刷新页面');
+                    });
             } else {
                 audioPlayer.pause();
                 playBtn.textContent = '▶';
@@ -251,21 +256,26 @@
         // 切换音乐按钮功能
         switchBtn.addEventListener('click', () => {
             currentMusicIndex = (currentMusicIndex + 1) % musicSources.length;
-            const source = document.querySelector('#audio-player source');
-            source.src = musicSources[currentMusicIndex];
+            // 直接修改audio元素的src属性
+            audioPlayer.src = musicSources[currentMusicIndex];
             audioPlayer.load();
-            audioPlayer.play();
-            
-            // 更新显示的音乐名称
-            const musicName = musicSources[currentMusicIndex].split('/').pop();
-            musicTitle.textContent = `当前播放: ${musicName}`;
-            
-            // 更新按钮文字
-            const otherMusicName = musicSources[(currentMusicIndex + 1) % musicSources.length].split('/').pop();
-            switchBtn.textContent = `切换到 ${otherMusicName}`;
-            
-            // 确保按钮显示为暂停状态
-            playBtn.textContent = '⏸';
+            audioPlayer.play()
+                .then(() => {
+                    // 更新显示的音乐名称
+                    const musicName = musicSources[currentMusicIndex].split('/').pop();
+                    musicTitle.textContent = `当前播放: ${musicName}`;
+                    
+                    // 更新按钮文字
+                    const otherMusicName = musicSources[(currentMusicIndex + 1) % musicSources.length].split('/').pop();
+                    switchBtn.textContent = `切换到 ${otherMusicName}`;
+                    
+                    // 确保按钮显示为暂停状态
+                    playBtn.textContent = '⏸';
+                })
+                .catch(error => {
+                    console.error('播放失败:', error);
+                    alert('音频播放失败，请检查网络连接或尝试刷新页面');
+                });
         });
         
         // 上一首/下一首按钮功能
@@ -279,21 +289,26 @@
         
         function switchMusic(direction) {
             currentMusicIndex = (currentMusicIndex + direction + musicSources.length) % musicSources.length;
-            const source = document.querySelector('#audio-player source');
-            source.src = musicSources[currentMusicIndex];
+            // 直接修改audio元素的src属性
+            audioPlayer.src = musicSources[currentMusicIndex];
             audioPlayer.load();
-            audioPlayer.play();
-            
-            // 更新显示的音乐名称
-            const musicName = musicSources[currentMusicIndex].split('/').pop();
-            musicTitle.textContent = `当前播放: ${musicName}`;
-            
-            // 更新切换按钮文字
-            const otherMusicName = musicSources[(currentMusicIndex + 1) % musicSources.length].split('/').pop();
-            switchBtn.textContent = `切换到 ${otherMusicName}`;
-            
-            // 确保按钮显示为暂停状态
-            playBtn.textContent = '⏸';
+            audioPlayer.play()
+                .then(() => {
+                    // 更新显示的音乐名称
+                    const musicName = musicSources[currentMusicIndex].split('/').pop();
+                    musicTitle.textContent = `当前播放: ${musicName}`;
+                    
+                    // 更新切换按钮文字
+                    const otherMusicName = musicSources[(currentMusicIndex + 1) % musicSources.length].split('/').pop();
+                    switchBtn.textContent = `切换到 ${otherMusicName}`;
+                    
+                    // 确保按钮显示为暂停状态
+                    playBtn.textContent = '⏸';
+                })
+                .catch(error => {
+                    console.error('播放失败:', error);
+                    alert('音频播放失败，请检查网络连接或尝试刷新页面');
+                });
         }
         
         // 初始化播放按钮状态
@@ -308,6 +323,19 @@
         // 音频播放结束时自动播放下一首
         audioPlayer.addEventListener('ended', () => {
             switchMusic(1);
+        });
+        
+        // 页面加载完成后尝试自动播放
+        window.addEventListener('load', () => {
+            // 延迟一点时间再尝试播放，确保元素加载完成
+            setTimeout(() => {
+                audioPlayer.play()
+                    .catch(error => {
+                        console.log('自动播放失败:', error);
+                        // 自动播放失败时更新按钮状态
+                        playBtn.textContent = '▶';
+                    });
+            }, 1000);
         });
     </script>
 
