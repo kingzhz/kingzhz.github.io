@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>loving</title>
+    <meta name="language" content="zh-CN">
+    <meta name="title" content="loving">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="https://cdn.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png" onerror="this.href='https://fastly.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png'">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: pink;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .word {
+            position: relative;
+            width: 80%;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 8vw;
+            color: #c70012;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* 新增:飘动的小爱心样式 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .small-heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #c70012; /* 修改为红色 */
+            opacity: 0.7;
+            animation: floatUp 5s ease-in forwards;
+        }
+        
+        /* 创建更标准的心形 */
+        .small-heart::before,
+        .small-heart::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #c70012;
+            border-radius: 50%;
+        }
+        
+        .small-heart::before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .small-heart::after {
+            top: 0;
+            left: 50%;
+        }
+        
+        .small-heart {
+            transform: rotate(-45deg); /* 修改:旋转-45度使心尖朝下 */
+            transform-origin: center;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: rotate(-45deg) translate(0, 0); /* 修改:调整初始旋转角度 */
+                opacity: 0.7;
+            }
+            100% {
+                transform: rotate(-45deg) translate(100px, -100px); /* 修改:调整目标旋转角度 */
+                opacity: 0;
+            }
+        }
+        
+        /* 媒体查询：针对较大屏幕 */
+        @media (min-width: 768px) {
+            .word {
+                font-size: 40px;
+            }
+        }
+        
+        /* 音乐播放器样式 - 左侧设计 */
+        .music-player-container {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            z-index: 1000;
+        }
+        
+        .music-player {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 120px;
+            transition: all 0.3s ease;
+            position: relative; /* 添加相对定位 */
+        }
+        
+        .music-player.minimized {
+            width: 80px;
+            padding: 5px;
+        }
+        
+        .music-player.minimized .music-title,
+        .music-player.minimized .music-controls {
+            display: none;
+        }
+        
+        .toggle-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .music-title {
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #c70012;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .music-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 8px 0;
+            max-height: 120px;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 120px;
+            display: none;
+            z-index: 1001; /* 提高z-index */
+        }
+        
+        .music-list.show {
+            display: block;
+        }
+        
+        .music-list li {
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 4px;
+            background-color: rgba(199, 0, 18, 0.1);
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .music-list li:hover {
+            background-color: rgba(199, 0, 18, 0.3);
+        }
+        
+        .music-list li.active {
+            background-color: #c70012;
+            color: white;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .music-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .music-btn:hover {
+            background-color: #d5093c;
+        }
+        
+        .music-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .toggle-list-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            padding: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        
+        .toggle-list-btn:hover {
+            background-color: #d5093c;
+        }
+        
+        /* 背景图片上传按钮样式 */
+        .bg-upload-ui {
+            opacity: 0.7; /* 提高透明度 */
+        }
+        
+        .bg-upload-btn {
+            padding: 5px 10px; /* 缩小按钮 */
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px; /* 缩小字体 */
+        }
+        
+        .bg-upload-btn:hover {
+            background-color: #d5093c;
+            opacity: 1;
+        }
+        
+        #bg-upload-input {
+            display: none;
+        }
+        
+        /* 新增:底部UI容器样式 */
+        .bottom-ui-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .custom-text-ui, .bg-upload-ui {
+            margin: 0;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <!-- 新增:飘动的小爱心容器 -->
+    <div class="floating-hearts" id="floating-hearts"></div>
+
+    <b class="word">love</b>
+    
+    <!-- 底部UI容器 -->
+    <div class="bottom-ui-container">
+        <!-- 自定义文字UI -->
+        <div class="custom-text-ui">
+            <input type="text" id="custom-text-input" placeholder="输入自定义文字"
+                   style="padding: 8px; border: 1px solid #c70012; border-radius: 4px;">
+            <button id="update-text-btn"
+                    style="padding: 8px 16px; background-color: #c70012; color: white;
+                           border: none; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+                更新文字
+            </button>
+        </div>
+        
+        <!-- 背景图片上传UI -->
+        <div class="bg-upload-ui">
+            <input type="file" id="bg-upload-input" accept="image/*">
+            <button class="bg-upload-btn" id="bg-upload-btn">更换背景图片</button>
+        </div>
+    </div>
+
+    <!-- 音乐播放器UI - 左侧设计 -->
+    <div class="music-player-container">
+        <div class="music-player minimized" id="music-player">
+            <button class="toggle-btn" id="toggle-btn">▶</button>
+            <div class="music-title" id="music-title">音乐播放器</div>
+            <ul class="music-list" id="music-list">
+                <!-- 音乐列表将通过JavaScript动态生成 -->
+            </ul>
+            <div class="music-controls">
+                <button class="music-btn" id="play-btn" title="播放/暂停">⏯</button>
+                <button class="music-btn" id="list-toggle-btn" title="音乐列表">☰</button>
+            </div>
+        </div>
+    </div>
+    
+    
+    <audio id="audio-player" preload="auto"></audio>
+
+    <script>
+        // 新增:创建飘动的小爱心
+        function createFloatingHearts() {
+            const container = document.getElementById('floating-hearts');
+            // 修改:将爱心数量提升为当前的200%(从5-9改为10-18)
+            const heartCount = Math.floor(Math.random() * 9) + 10; // 10-18个爱心
+            
+            for (let i = 0; i < heartCount; i++) {
+                // 延迟创建每个爱心，使它们不是同时出现
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('small-heart');
+                    
+                    // 随机位置和大小
+                    const size = Math.random() * 10 + 10; // 10-20px
+                    heart.style.width = `${size}px`;
+                    heart.style.height = `${size}px`;
+                    
+                    // 修改:初始位置向左上角再移动25px，总共移动100px，并优化随机分布算法
+                    // 使用网格分布算法来确保更均匀的分布
+                    const gridSize = 5; // 5x5网格
+                    const cellSize = 50 / gridSize; // 每个网格单元大小(从40改为50)
+                    const gridX = Math.floor(Math.random() * gridSize);
+                    const gridY = Math.floor(Math.random() * gridSize);
+                    
+                    // 在网格单元内随机偏移
+                    const offsetX = 25 + gridX * cellSize + Math.random() * cellSize;
+                    const offsetY = 25 + gridY * cellSize + Math.random() * cellSize;
+                    
+                    heart.style.left = `${offsetX}px`;
+                    heart.style.top = `${offsetY}px`;
+                    
+                    // 随机动画时长和路径
+                    // 修改:将动画持续时间从2.1-3.7秒改为2.1-3.7秒的150%再除以1.4
+                    // 再次修改:将飘散速度改为当前的90%(即持续时间变为原来的1/0.9≈1.11倍)
+                    const duration = (Math.random() * 1.6 + 2.1) * 1.5 / 1.4 * 1.11; // 2.1-3.7秒的150%再除以1.4，再调整为90%速度
+                    
+                    // 修改:飘散方向改为远离生成位置，但减少向第二象限飘散的数量
+                    let xDistance, yDistance;
+                    // 计算从中心点(50, 50)到当前点的方向(中心点也相应调整)
+                    const centerX = 50;
+                    const centerY = 50;
+                    const deltaX = offsetX - centerX;
+                    const deltaY = offsetY - centerY;
+                    
+                    // 计算距离和单位向量
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    if (distance > 0) {
+                        let unitX = deltaX / distance;
+                        let unitY = deltaY / distance;
+                        
+                        // 计算角度以确定象限
+                        const angle = Math.atan2(unitY, unitX);
+                        const angleDegrees = angle * 180 / Math.PI;
+                        
+                        // 如果是第二象限(角度在90到180度之间)，减少概率
+                        if (angleDegrees > 90 && angleDegrees < 180) {
+                            // 50%概率减少向第二象限的飘散(从30%提高到50%)
+                            if (Math.random() < 0.5) {
+                                // 将第二象限的向量调整为其他象限
+                                unitX = -unitX;
+                                unitY = -unitY;
+                            }
+                        }
+                        
+                        // 随机距离50-150px
+                        const moveDistance = 50 + Math.random() * 100;
+                        xDistance = unitX * moveDistance;
+                        yDistance = unitY * moveDistance;
+                    } else {
+                        // 如果正好在中心点，则随机方向
+                        // 但减少向第二象限的概率
+                        let angle = Math.random() * 2 * Math.PI;
+                        const angleDegrees = angle * 180 / Math.PI;
+                        
+                        // 如果随机角度在第二象限，50%概率重新选择(从30%提高到50%)
+                        if (angleDegrees > 90 && angleDegrees < 180 && Math.random() < 0.5) {
+                            // 重新选择角度，避开第二象限
+                            angle = Math.random() > 0.5 ? 
+                                Math.random() * 90 * Math.PI / 180 : // 第一象限
+                                (180 + Math.random() * 90) * Math.PI / 180; // 第三象限
+                        }
+                        
+                        const distance = 50 + Math.random() * 100; // 50-150px的距离
+                        xDistance = Math.cos(angle) * distance;
+                        yDistance = Math.sin(angle) * distance;
+                    }
+                    
+                    // 为每个爱心创建独特的移动向量，确保不重复
+                    const uniqueId = Date.now() + '_' + i + '_' + Math.floor(Math.random() * 10000);
+                    
+                    // 添加自定义关键帧动画
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        @keyframes floatUp${uniqueId} {
+                            0% {
+                                transform: rotate(-45deg) translate(0, 0);
+                                opacity: 0.7;
+                            }
+                            100% {
+                                transform: rotate(-45deg) translate(${xDistance}px, ${yDistance}px);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    heart.style.animation = `floatUp${uniqueId} ${duration}s ease-in forwards`;
+                    
+                    container.appendChild(heart);
+                    
+                    // 动画结束后移除元素
+                    setTimeout(() => {
+                        if (heart.parentNode) {
+                            heart.parentNode.removeChild(heart);
+                        }
+                        // 清理样式以避免内存泄漏
+                        style.remove();
+                    }, duration * 1000);
+                }, i * 100); // 修改:每个爱心间隔100ms创建(从150ms减少，以适应更多爱心)
+            }
+        }
+        
+        // 页面加载完成后开始创建飘动的爱心
+        window.addEventListener('load', () => {
+            createFloatingHearts();
+            // 修改:将间隔调整为原来875ms的1.5倍以匹配延长的动画时间
+            // 根据需求提升每秒生成数量为当前的200%(即间隔变为原来的1/2)
+            // 再次修改:将每秒生成数量改为当前数量的75%(即间隔变为原来的1/0.75≈1.33倍)
+            // 最新修改:将每秒生成数量缩小为当前的90%(即间隔变为原来的1/0.9≈1.11倍)
+            // 最新要求:缩小每秒生成数量为当前数量的80%(即间隔变为原来的1/0.8=1.25倍)
+            setInterval(createFloatingHearts, 875 * 1.5 / 2 * 1.33 * 1.11 * 1.25);
+        });
+
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const musicTitle = document.getElementById('music-title');
+        const musicList = document.getElementById('music-list');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const musicPlayer = document.getElementById('music-player');
+        
+        // 定义音乐列表，包含歌曲名称和URL
+        const musicSources = [
+            {
+                name: '断桥残雪',
+                url: 'https://kingzhz.github.io/dqcx.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/dqcx.mp3'
+            },
+            {
+                name: '全球变冷',
+                url: 'https://kingzhz.github.io/qqbl.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/qqbl.mp3'
+            },
+            {
+                name: '烟花笑',
+                url: 'https://kingzhz.github.io/yhx.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/yhx.mp3'
+            },
+            {
+                name: '解药',
+                url: 'https://kingzhz.github.io/jy.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/jy.mp3'
+            }
+        ];
+        
+        let currentMusicIndex = 3; // 修改:将默认播放索引改为3(解药在数组中的位置)
+        let isLoading = false;
+        
+        // 初始化音频播放器
+        function initPlayer() {
+            renderMusicList();
+            loadMusic(currentMusicIndex);
+            // 默认隐藏播放器
+            musicPlayer.classList.add('minimized');
+            toggleBtn.textContent = '▶';
+        }
+        
+        // 渲染音乐列表
+        function renderMusicList() {
+            musicList.innerHTML = '';
+            musicSources.forEach((music, index) => {
+                const li = document.createElement('li');
+                li.textContent = music.name;
+                li.dataset.index = index;
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => {
+                    if (index !== currentMusicIndex) {
+                        loadMusic(index);
+                    }
+                });
+                musicList.appendChild(li);
+            });
+        }
+        
+        // 更新UI状态
+        function updateUI() {
+            // 更新列表中的激活项
+            document.querySelectorAll('.music-list li').forEach((li, index) => {
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                } else {
+                    li.classList.remove('active');
+                }
+            });
+            
+            // 更新当前播放音乐标题
+            musicTitle.textContent = musicSources[currentMusicIndex].name;
+            
+            playBtn.textContent = audioPlayer.paused ? '▶' : '⏸';
+        }
+        
+        // 加载音乐(带重试逻辑)
+        function loadMusic(index, retryCount = 0) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            currentMusicIndex = index;
+            const music = musicSources[index];
+            
+            const tryLoad = (url) => {
+                audioPlayer.src = url;
+                audioPlayer.load();
+                
+                return new Promise((resolve) => {
+                    const onCanPlay = () => {
+                        audioPlayer.removeEventListener('canplay', onCanPlay);
+                        resolve(true);
+                    };
+                    
+                    const onError = () => {
+                        audioPlayer.removeEventListener('error', onError);
+                        resolve(false);
+                    };
+                    
+                    audioPlayer.addEventListener('canplay', onCanPlay, { once: true });
+                    audioPlayer.addEventListener('error', onError, { once: true });
+                });
+            };
+            
+            // 先尝试主URL
+            tryLoad(music.url).then(success => {
+                if (!success && music.backupUrl && retryCount < 1) {
+                    // 主URL失败且还有重试次数，尝试备用URL
+                    return tryLoad(music.backupUrl);
+                }
+                return success;
+            }).then(success => {
+                if (success) {
+                    audioPlayer.play().catch(e => {
+                        console.error('播放失败:', e);
+                        showError('播放失败，请点击播放按钮重试');
+                    });
+                } else {
+                    showError(`无法加载音频: ${music.name}`);
+                }
+                updateUI();
+                isLoading = false;
+            });
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            musicTitle.textContent = message;
+            musicTitle.style.color = '#ff0000';
+            setTimeout(() => {
+                musicTitle.style.color = '#c70012';
+                musicTitle.textContent = musicSources[currentMusicIndex].name;
+            }, 2000);
+        }
+        
+        // 播放/暂停按钮功能
+        playBtn.addEventListener('click', () => {
+            if (isLoading) return;
+            
+            if (audioPlayer.paused) {
+                // 如果音频未加载或加载失败，重新加载
+                if (audioPlayer.readyState < 3 || audioPlayer.error) {
+                    loadMusic(currentMusicIndex);
+                } else {
+                    audioPlayer.play().catch(e => {
+                        console.error('播放失败:', e);
+                        showError('播放失败，正在重试...');
+                        loadMusic(currentMusicIndex);
+                    });
+                }
+            } else {
+                audioPlayer.pause();
+            }
+            updateUI();
+        });
+
+        // 切换播放器展开/收起状态
+        toggleBtn.addEventListener('click', () => {
+            musicPlayer.classList.toggle('minimized');
+            if (musicPlayer.classList.contains('minimized')) {
+                toggleBtn.textContent = '▶';
+                // 隐藏音乐列表
+                musicList.classList.remove('show');
+            } else {
+                toggleBtn.textContent = '◀';
+            }
+        });
+        
+        // 切换音乐列表显示/隐藏
+        document.getElementById('list-toggle-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            musicList.classList.toggle('show');
+        });
+        
+        // 点击页面其他地方隐藏音乐列表
+        document.addEventListener('click', (e) => {
+            if (!musicPlayer.contains(e.target) && !musicList.contains(e.target)) {
+                musicList.classList.remove('show');
+            }
+        });
+        
+        // 更新播放按钮状态
+        audioPlayer.addEventListener('play', updateUI);
+        audioPlayer.addEventListener('pause', updateUI);
+        
+        // 音频播放结束时自动播放下一首
+        audioPlayer.addEventListener('ended', () => {
+            const nextIndex = (currentMusicIndex + 1) % musicSources.length;
+            loadMusic(nextIndex);
+        });
+        
+        // 初始化播放器
+        initPlayer();
+        
+        // 自定义文字功能
+        const wordElement = document.querySelector('.word');
+        const updateBtn = document.getElementById('update-text-btn');
+        const textInput = document.getElementById('custom-text-input');
+        
+        updateBtn.addEventListener('click', () => {
+            if (textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+        
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+        
+        // 背景图片上传功能
+        const bgUploadInput = document.getElementById('bg-upload-input');
+        const bgUploadBtn = document.getElementById('bg-upload-btn');
+        
+        bgUploadBtn.addEventListener('click', () => {
+            bgUploadInput.click();
+        });
+        
+        bgUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // 直接设置背景图片
+                    document.body.style.backgroundImage = `url(${event.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+    </script>
+</body>
+</html>
