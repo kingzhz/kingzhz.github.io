@@ -246,8 +246,6 @@
         
         /* 背景图片上传按钮样式 */
         .bg-upload-ui {
-            margin-top: 20px;
-            text-align: center;
             opacity: 0.7; /* 提高透明度 */
         }
         
@@ -270,6 +268,22 @@
             display: none;
         }
         
+        /* 新增:底部UI容器样式 */
+        .bottom-ui-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .custom-text-ui, .bg-upload-ui {
+            margin: 0;
+        }
+        
     </style>
 </head>
 
@@ -279,21 +293,24 @@
 
     <b class="word">love</b>
     
-    <!-- 自定义文字UI -->
-    <div class="custom-text-ui" style="margin-top: 20px; text-align: center;">
-        <input type="text" id="custom-text-input" placeholder="输入自定义文字"
-               style="padding: 8px; border: 1px solid #c70012; border-radius: 4px;">
-        <button id="update-text-btn"
-                style="padding: 8px 16px; background-color: #c70012; color: white;
-                       border: none; border-radius: 4px; margin-left: 8px; cursor: pointer;">
-            更新文字
-        </button>
-    </div>
-    
-    <!-- 背景图片上传UI -->
-    <div class="bg-upload-ui">
-        <input type="file" id="bg-upload-input" accept="image/*">
-        <button class="bg-upload-btn" id="bg-upload-btn">更换背景图片</button>
+    <!-- 底部UI容器 -->
+    <div class="bottom-ui-container">
+        <!-- 自定义文字UI -->
+        <div class="custom-text-ui">
+            <input type="text" id="custom-text-input" placeholder="输入自定义文字"
+                   style="padding: 8px; border: 1px solid #c70012; border-radius: 4px;">
+            <button id="update-text-btn"
+                    style="padding: 8px 16px; background-color: #c70012; color: white;
+                           border: none; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+                更新文字
+            </button>
+        </div>
+        
+        <!-- 背景图片上传UI -->
+        <div class="bg-upload-ui">
+            <input type="file" id="bg-upload-input" accept="image/*">
+            <button class="bg-upload-btn" id="bg-upload-btn">更换背景图片</button>
+        </div>
     </div>
 
     <!-- 音乐播放器UI - 左侧设计 -->
