@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>loving</title>
+    <meta name="language" content="zh-CN">
+    <meta name="title" content="loving">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="https://cdn.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png" onerror="this.href='https://fastly.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png'">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: pink;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #frame {
+            position: relative;
+            width: 80vw;
+            height: 60vw;
+            max-width: 400px;
+            max-height: 300px;
+            margin: 20px auto;
+        }
+
+        .left,
+        .right {
+            top: 0;
+            width: 40vw;
+            height: 40vw;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+        }
+
+        .left {
+            left: 7vw;
+        }
+
+        .right {
+            right: 7vw;
+            z-index: -1;
+        }
+
+        .bottom {
+            bottom: 7.2vw;
+            left: 20vw;
+            width: 40vw;
+            height: 40vw;
+            max-width: 200px;
+            max-height: 200px;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            box-shadow: 0 0 40px #d5093c;
+            animation: beat .4s ease infinite normal;
+            background: linear-gradient(-90deg, #F50A45 0%, #d5093c 40%);
+        }
+
+        @keyframes beat {
+            0% {
+                transform: scale(1) rotate(225deg);
+                box-shadow: 0 0 40px #d5093c;
+            }
+
+            50% {
+                transform: scale(1.1) rotate(225deg);
+                box-shadow: 0 0 70px #d5093c;
+            }
+
+            100% {
+                transform: scale(1) rotate(225deg);
+                box-shadow: 0 0 40px #d5093c;
+            }
+        }
+
+        .word {
+            position: relative;
+            width: 80%;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 8vw;
+            color: #c70012;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* 媒体查询：针对较大屏幕 */
+        @media (min-width: 768px) {
+            .word {
+                font-size: 40px;
+            }
+            
+            .left, .right {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .bottom {
+                width: 200px;
+                height: 200px;
+                bottom: 36px;
+                left: 100px;
+            }
+            
+            .left {
+                left: 35px;
+            }
+            
+            .right {
+                right: 35px;
+            }
+            
+            #frame {
+                width: 400px;
+                height: 300px;
+            }
+        }
+        
+        /* 音乐播放器样式 - 左侧设计 */
+        .music-player-container {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            z-index: 1000;
+        }
+        
+        .music-player {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 120px;
+            transition: all 0.3s ease;
+        }
+        
+        .music-player.minimized {
+            width: 80px;
+            padding: 5px;
+        }
+        
+        .music-player.minimized .music-title,
+        .music-player.minimized .music-controls {
+            display: none;
+        }
+        
+        .toggle-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .music-title {
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #c70012;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .music-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 8px 0;
+            max-height: 120px;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 120px;
+            display: none;
+        }
+        
+        .music-list.show {
+            display: block;
+        }
+        
+        .music-list li {
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 4px;
+            background-color: rgba(199, 0, 18, 0.1);
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .music-list li:hover {
+            background-color: rgba(199, 0, 18, 0.3);
+        }
+        
+        .music-list li.active {
+            background-color: #c70012;
+            color: white;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .music-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .music-btn:hover {
+            background-color: #d5093c;
+        }
+        
+        .music-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .toggle-list-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            padding: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        
+        .toggle-list-btn:hover {
+            background-color: #d5093c;
+        }
+        
+        /* 背景图片上传按钮样式 */
+        .bg-upload-ui {
+            margin-top: 20px;
+            text-align: center;
+            opacity: 0.7; /* 提高透明度 */
+        }
+        
+        .bg-upload-btn {
+            padding: 5px 10px; /* 缩小按钮 */
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px; /* 缩小字体 */
+        }
+        
+        .bg-upload-btn:hover {
+            background-color: #d5093c;
+            opacity: 1;
+        }
+        
+        #bg-upload-input {
+            display: none;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="frame">
+        <div class="heart left"></div>
+        <div class="heart right"></div>
+        <div class="heart bottom"></div>
+    </div>
+
+    <b class="word">love</b>
+    
+    <!-- 自定义文字UI -->
+    <div class="custom-text-ui" style="margin-top: 20px; text-align: center;">
+        <input type="text" id="custom-text-input" placeholder="输入自定义文字"
+               style="padding: 8px; border: 1px solid #c70012; border-radius: 4px;">
+        <button id="update-text-btn"
+                style="padding: 8px 16px; background-color: #c70012; color: white;
+                       border: none; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+            更新文字
+        </button>
+    </div>
+    
+    <!-- 背景图片上传UI -->
+    <div class="bg-upload-ui">
+        <input type="file" id="bg-upload-input" accept="image/*">
+        <button class="bg-upload-btn" id="bg-upload-btn">更换背景图片</button>
+    </div>
+
+    <!-- 音乐播放器UI - 左侧设计 -->
+    <div class="music-player-container">
+        <div class="music-player minimized" id="music-player">
+            <button class="toggle-btn" id="toggle-btn">▶</button>
+            <div class="music-title" id="music-title">音乐播放器</div>
+            <ul class="music-list" id="music-list">
+                <!-- 音乐列表将通过JavaScript动态生成 -->
+            </ul>
+            <div class="music-controls">
+                <button class="music-btn" id="play-btn" title="播放/暂停">⏯</button>
+                <button class="music-btn" id="list-toggle-btn" title="音乐列表">☰</button>
+            </div>
+        </div>
+    </div>
+    
+    
+    <audio id="audio-player" preload="auto"></audio>
+
+    <script>
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const musicTitle = document.getElementById('music-title');
+        const musicList = document.getElementById('music-list');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const musicPlayer = document.getElementById('music-player');
+        
+        // 定义音乐列表，包含歌曲名称和URL
+        const musicSources = [
+            {
+                name: '断桥残雪',
+                url: 'https://kingzhz.github.io/dqcx.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/dqcx.mp3'
+            },
+            {
+                name: '全球变冷',
+                url: 'https://kingzhz.github.io/qqbl.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/qqbl.mp3'
+            },
+            {
+                name: '烟花笑',
+                url: 'https://kingzhz.github.io/yhx.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/yhx.mp3'
+            }
+        ];
+        
+        let currentMusicIndex = 0;
+        let isLoading = false;
+        
+        // 初始化音频播放器
+        function initPlayer() {
+            renderMusicList();
+            loadMusic(currentMusicIndex);
+            // 默认隐藏播放器
+            musicPlayer.classList.add('minimized');
+            toggleBtn.textContent = '▶';
+        }
+        
+        // 渲染音乐列表
+        function renderMusicList() {
+            musicList.innerHTML = '';
+            musicSources.forEach((music, index) => {
+                const li = document.createElement('li');
+                li.textContent = music.name;
+                li.dataset.index = index;
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => {
+                    if (index !== currentMusicIndex) {
+                        loadMusic(index);
+                    }
+                });
+                musicList.appendChild(li);
+            });
+        }
+        
+        // 更新UI状态
+        function updateUI() {
+            // 更新列表中的激活项
+            document.querySelectorAll('.music-list li').forEach((li, index) => {
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                } else {
+                    li.classList.remove('active');
+                }
+            });
+            
+            // 更新当前播放音乐标题
+            musicTitle.textContent = musicSources[currentMusicIndex].name;
+            
+            playBtn.textContent = audioPlayer.paused ? '▶' : '⏸';
+        }
+        
+        // 加载音乐(带重试逻辑)
+        function loadMusic(index, retryCount = 0) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            currentMusicIndex = index;
+            const music = musicSources[index];
+            
+            const tryLoad = (url) => {
+                audioPlayer.src = url;
+                audioPlayer.load();
+                
+                return new Promise((resolve) => {
+                    const onCanPlay = () => {
+                        audioPlayer.removeEventListener('canplay', onCanPlay);
+                        resolve(true);
+                    };
+                    
+                    const onError = () => {
+                        audioPlayer.removeEventListener('error', onError);
+                        resolve(false);
+                    };
+                    
+                    audioPlayer.addEventListener('canplay', onCanPlay, { once: true });
+                    audioPlayer.addEventListener('error', onError, { once: true });
+                });
+            };
+            
+            // 先尝试主URL
+            tryLoad(music.url).then(success => {
+                if (!success && music.backupUrl && retryCount < 1) {
+                    // 主URL失败且还有重试次数，尝试备用URL
+                    return tryLoad(music.backupUrl);
+                }
+                return success;
+            }).then(success => {
+                if (success) {
+                    audioPlayer.play().catch(e => {
+                        console.error('播放失败:', e);
+                        showError('播放失败，请点击播放按钮重试');
+                    });
+                } else {
+                    showError(`无法加载音频: ${music.name}`);
+                }
+                updateUI();
+                isLoading = false;
+            });
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            musicTitle.textContent = message;
+            musicTitle.style.color = '#ff0000';
+            setTimeout(() => {
+                musicTitle.style.color = '#c70012';
+                musicTitle.textContent = musicSources[currentMusicIndex].name;
+            }, 2000);
+        }
+        
+        // 播放/暂停按钮功能
+        playBtn.addEventListener('click', () => {
+            if (isLoading) return;
+            
+            if (audioPlayer.paused) {
+                // 如果音频未加载或加载失败，重新加载
+                if (audioPlayer.readyState < 3 || audioPlayer.error) {
+                    loadMusic(currentMusicIndex);
+                } else {
+                    audioPlayer.play().catch(e => {
+                        console.error('播放失败:', e);
+                        showError('播放失败，正在重试...');
+                        loadMusic(currentMusicIndex);
+                    });
+                }
+            } else {
+                audioPlayer.pause();
+            }
+            updateUI();
+        });
+
+        // 切换播放器展开/收起状态
+        toggleBtn.addEventListener('click', () => {
+            musicPlayer.classList.toggle('minimized');
+            if (musicPlayer.classList.contains('minimized')) {
+                toggleBtn.textContent = '▶';
+                // 隐藏音乐列表
+                musicList.classList.remove('show');
+            } else {
+                toggleBtn.textContent = '◀';
+            }
+        });
+        
+        // 切换音乐列表显示/隐藏
+        document.getElementById('list-toggle-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            musicList.classList.toggle('show');
+        });
+        
+        // 点击页面其他地方隐藏音乐列表
+        document.addEventListener('click', (e) => {
+            if (!musicPlayer.contains(e.target) && !musicList.contains(e.target)) {
+                musicList.classList.remove('show');
+            }
+        });
+        
+        // 更新播放按钮状态
+        audioPlayer.addEventListener('play', updateUI);
+        audioPlayer.addEventListener('pause', updateUI);
+        
+        // 音频播放结束时自动播放下一首
+        audioPlayer.addEventListener('ended', () => {
+            const nextIndex = (currentMusicIndex + 1) % musicSources.length;
+            loadMusic(nextIndex);
+        });
+        
+        // 初始化播放器
+        initPlayer();
+        
+        // 自定义文字功能
+        const wordElement = document.querySelector('.word');
+        const updateBtn = document.getElementById('update-text-btn');
+        const textInput = document.getElementById('custom-text-input');
+        
+        updateBtn.addEventListener('click', () => {
+            if (textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+        
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && textInput.value.trim()) {
+                wordElement.textContent = textInput.value.trim();
+            }
+        });
+        
+        // 背景图片上传功能
+        const bgUploadInput = document.getElementById('bg-upload-input');
+        const bgUploadBtn = document.getElementById('bg-upload-btn');
+        
+        bgUploadBtn.addEventListener('click', () => {
+            bgUploadInput.click();
+        });
+        
+        bgUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // 直接设置背景图片
+                    document.body.style.backgroundImage = `url(${event.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+    </script>
+</body>
+</html>
