@@ -129,24 +129,107 @@
             }
         }
         
-        /* 音乐播放器样式 */
+        /* 音乐播放器样式 - 左侧设计 */
+        .music-player-container {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            z-index: 1000;
+        }
+        
         .music-player {
-            margin-top: 20px;
-            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 120px;
+            transition: all 0.3s ease;
+        }
+        
+        .music-player.minimized {
+            width: 80px;
+            padding: 5px;
+        }
+        
+        .music-player.minimized .music-title,
+        .music-player.minimized .music-controls {
+            display: none;
+        }
+        
+        .toggle-btn {
+            background-color: #c70012;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         
         .music-title {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 8px;
             color: #c70012;
             font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .music-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 8px 0;
+            max-height: 120px;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 120px;
+            display: none;
+        }
+        
+        .music-list.show {
+            display: block;
+        }
+        
+        .music-list li {
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 4px;
+            background-color: rgba(199, 0, 18, 0.1);
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .music-list li:hover {
+            background-color: rgba(199, 0, 18, 0.3);
+        }
+        
+        .music-list li.active {
+            background-color: #c70012;
+            color: white;
         }
         
         .music-controls {
             display: flex;
-            gap: 10px;
+            gap: 4px;
             justify-content: center;
-            align-items: center;
         }
         
         .music-btn {
@@ -154,9 +237,9 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -172,18 +255,19 @@
             cursor: not-allowed;
         }
         
-        .music-switch {
+        .toggle-list-btn {
             background-color: #c70012;
             color: white;
             border: none;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
+            border-radius: 4px;
+            width: 100%;
+            padding: 4px;
+            font-size: 10px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-bottom: 8px;
         }
         
-        .music-switch:hover {
+        .toggle-list-btn:hover {
             background-color: #d5093c;
         }
     </style>
@@ -209,15 +293,19 @@
         </button>
     </div>
 
-    <!-- 音乐播放器UI -->
-    <div class="music-player">
-        <div class="music-title" id="music-title">当前播放: 断桥残雪</div>
-        <div class="music-controls">
-            <button class="music-btn" id="prev-btn" title="上一首">⏮</button>
-            <button class="music-btn" id="play-btn" title="播放/暂停">⏯</button>
-            <button class="music-btn" id="next-btn" title="下一首">⏭</button>
+    <!-- 音乐播放器UI - 左侧设计 -->
+    <div class="music-player-container">
+        <div class="music-player minimized" id="music-player">
+            <button class="toggle-btn" id="toggle-btn">▶</button>
+            <div class="music-title" id="music-title">音乐播放器</div>
+            <ul class="music-list" id="music-list">
+                <!-- 音乐列表将通过JavaScript动态生成 -->
+            </ul>
+            <div class="music-controls">
+                <button class="music-btn" id="play-btn" title="播放/暂停">⏯</button>
+                <button class="music-btn" id="list-toggle-btn" title="音乐列表">☰</button>
+            </div>
         </div>
-        <button class="music-switch" id="switch-btn">切换到 全球变冷</button>
     </div>
     
     <audio id="audio-player" preload="auto"></audio>
@@ -225,10 +313,10 @@
     <script>
         const audioPlayer = document.getElementById('audio-player');
         const playBtn = document.getElementById('play-btn');
-        const switchBtn = document.getElementById('switch-btn');
         const musicTitle = document.getElementById('music-title');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
+        const musicList = document.getElementById('music-list');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const musicPlayer = document.getElementById('music-player');
         
         // 定义音乐列表，包含歌曲名称和URL
         const musicSources = [
@@ -241,6 +329,11 @@
                 name: '全球变冷',
                 url: 'https://kingzhz.github.io/qqbl.mp3',
                 backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/qqbl.mp3'
+            },
+            {
+                name: '烟花笑',
+                url: 'https://kingzhz.github.io/yhx.mp3',
+                backupUrl: 'https://cdn.jsdelivr.net/gh/kingzhz/music/yhx.mp3'
             }
         ];
         
@@ -249,14 +342,46 @@
         
         // 初始化音频播放器
         function initPlayer() {
+            renderMusicList();
             loadMusic(currentMusicIndex);
+            // 默认隐藏播放器
+            musicPlayer.classList.add('minimized');
+            toggleBtn.textContent = '▶';
+        }
+        
+        // 渲染音乐列表
+        function renderMusicList() {
+            musicList.innerHTML = '';
+            musicSources.forEach((music, index) => {
+                const li = document.createElement('li');
+                li.textContent = music.name;
+                li.dataset.index = index;
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => {
+                    if (index !== currentMusicIndex) {
+                        loadMusic(index);
+                    }
+                });
+                musicList.appendChild(li);
+            });
         }
         
         // 更新UI状态
         function updateUI() {
-            musicTitle.textContent = `当前播放: ${musicSources[currentMusicIndex].name}`;
-            const nextIndex = (currentMusicIndex + 1) % musicSources.length;
-            switchBtn.textContent = `切换到 ${musicSources[nextIndex].name}`;
+            // 更新列表中的激活项
+            document.querySelectorAll('.music-list li').forEach((li, index) => {
+                if (index === currentMusicIndex) {
+                    li.classList.add('active');
+                } else {
+                    li.classList.remove('active');
+                }
+            });
+            
+            // 更新当前播放音乐标题
+            musicTitle.textContent = musicSources[currentMusicIndex].name;
+            
             playBtn.textContent = audioPlayer.paused ? '▶' : '⏸';
         }
         
@@ -315,7 +440,7 @@
             musicTitle.style.color = '#ff0000';
             setTimeout(() => {
                 musicTitle.style.color = '#c70012';
-                updateUI();
+                musicTitle.textContent = musicSources[currentMusicIndex].name;
             }, 2000);
         }
         
@@ -337,28 +462,33 @@
             } else {
                 audioPlayer.pause();
             }
+            updateUI();
         });
 
-        // 禁用/启用播放按钮
-        function updateButtonState() {
-            playBtn.disabled = isLoading;
-            prevBtn.disabled = isLoading;
-            nextBtn.disabled = isLoading;
-            switchBtn.disabled = isLoading;
-            updateUI();
-        }
+        // 切换播放器展开/收起状态
+        toggleBtn.addEventListener('click', () => {
+            musicPlayer.classList.toggle('minimized');
+            if (musicPlayer.classList.contains('minimized')) {
+                toggleBtn.textContent = '▶';
+                // 隐藏音乐列表
+                musicList.classList.remove('show');
+            } else {
+                toggleBtn.textContent = '◀';
+            }
+        });
         
-        // 切换音乐按钮功能
-        switchBtn.addEventListener('click', () => switchMusic(1));
+        // 切换音乐列表显示/隐藏
+        document.getElementById('list-toggle-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            musicList.classList.toggle('show');
+        });
         
-        // 上一首/下一首按钮功能
-        prevBtn.addEventListener('click', () => switchMusic(-1));
-        nextBtn.addEventListener('click', () => switchMusic(1));
-        
-        function switchMusic(direction) {
-            const newIndex = (currentMusicIndex + direction + musicSources.length) % musicSources.length;
-            loadMusic(newIndex);
-        }
+        // 点击页面其他地方隐藏音乐列表
+        document.addEventListener('click', (e) => {
+            if (!musicPlayer.contains(e.target) && !musicList.contains(e.target)) {
+                musicList.classList.remove('show');
+            }
+        });
         
         // 更新播放按钮状态
         audioPlayer.addEventListener('play', updateUI);
@@ -366,7 +496,8 @@
         
         // 音频播放结束时自动播放下一首
         audioPlayer.addEventListener('ended', () => {
-            switchMusic(1);
+            const nextIndex = (currentMusicIndex + 1) % musicSources.length;
+            loadMusic(nextIndex);
         });
         
         // 初始化播放器
